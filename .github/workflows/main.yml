@@ -1,0 +1,41 @@
+name: CI Workflow
+
+# Указываем события, при которых запускается workflow
+on:
+  push:
+    branches:
+      - main          # Когда вносятся изменения в ветку main
+      - development   # Когда вносятся изменения в ветку development
+      - release       # Когда вносятся изменения в ветку release
+  pull_request:
+    branches:
+      - main          # Когда создается PR в ветку main
+      - development   # Когда создается PR в ветку development
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Операционная система для выполнения CI
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2  # Клонируем репозиторий в CI
+
+      - name: Set up Python
+        uses: actions/setup-python@v2  # Устанавливаем нужную версию Python
+        with:
+          python-version: '3.8'  # Указываем версию Python, которую будет использовать CI
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt  # Устанавливаем зависимости проекта
+
+      - name: Run tests
+        run: |
+          pytest  # Запускаем тесты с помощью pytest
+
+      - name: Upload test results
+        if: failure()  # Если тесты не прошли, загружаем результаты
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: ./test-results  # Путь, где хранятся результаты тестов
